@@ -1,45 +1,6 @@
 #coding=utf-8
 
-# for Python2.7
-
-# support format:
-# 	base: int, float, bool, string, bytearray, list, tuple, type
-# 	object: 1)must inherit from object, 
-# 				2)must has parameter __dict__, __class__, 
-# 				3)must support ClassName.__new__(ClassName)
-# 			1),2),3) all shoult be satisfy
-# 		PS: if you write class satisfy 1), then 2),3) will be automatic support
-# 	others: numpy.ndarray(just used numpy.save&load)
-# unsupport:
-# 	module: it's too much data to save as a total module (module.__dict__)
-# 	file and so on
-# 	to unsupport type, program will save SaveLoadError() instead of that type
-# the type of object is store and recognize by type name string, specific codes are in save and load method of class SaveLoad, maybe can consider using integer instead of type name string to save store space
-# example are in example.py
-
-# 支持的类型：
-# 	基本类型：int, float, bool, string, bytearray, list, tuple, type
-# 	对象：需要满足以下3点：
-# 			1）继承object
-# 			2）有参数__dict__和__class__
-# 			3）能够进行 类名.__new__(类名) 来创建空对象
-# 		注：如果从object继承，事实上2和3都会满足
-# 	其它：numpy.ndarray（实现上直接调用了numpy的save和load方法）
-# 不支持：
-# 	模块对象和文件对象等等。。。
-# 	在实现上模块对象只保存模块名，读取时也只进行__import__(模块名)
-# 	对不支持的类型，程序会将其替换成SaveLoadError对象
-# 在实现中，类型是以类型名字符串来存储和辨认的，其实现在SaveLoad的save和laod方法中，可以考虑存储数字来代替字符串，节省空间
-# 实际使用参考emample.py
-
 import rw
-# rw just is a descript, 
-# if want write more save&load method for new type, should use io interface that rw have
-# normally use can import frw
-# rw模块只是io接口的描述
-# 想添加对类型的存取支持时，需要使用rw模块描述的io接口
-# 实际的应用，可以调用frw模块
-
 
 class SaveLoadError(object):
 	pass 
@@ -49,6 +10,7 @@ class SaveLoad:
 	error="rorre"
 	check="kcehc"
 	callbacks={}
+
 	# 注册新的类型的读写方法，
 	# 读取方法有两个load_cst和load_value，load_cst创建结构，load_value读取实际数据
 	# 如果读取的过程中不需要调用SaveLoad().load，可以在load_cst里直接读取实际数据，否则应该在load_value读取实际数据
@@ -72,10 +34,12 @@ class SaveLoad:
 		if load_value==None:
 			load_value=SaveLoad.load_val_empty
 		SaveLoad.callbacks[type]=[func_save,load_cst,load_value]
+
 	def init(self):
 		self.cnt=0
 		self.map={}
 		self.objs=[]
+
 	def __init__(self,show=False):
 		self.show = show  
 		self.init()
@@ -90,6 +54,7 @@ class SaveLoad:
 		self.regist('bytearray',SaveLoad.save_btarr,SaveLoad.load_btarr)
 		self.regist('module',SaveLoad.save_module,SaveLoad.load_module)
 		self.regist('numpy.ndarray',save_np,load_np)
+
 	def save(self,val,wt):
 		if self.show:
 			print "TRY SAVE:",val 
@@ -130,6 +95,7 @@ class SaveLoad:
 			print "save type:"+tp,
 			print "index:",self.map[i]
 		fc_save(val,wt,self.save)
+
 	def load(self,rd):
 		tp=rd.getstring()
 		if self.show:
