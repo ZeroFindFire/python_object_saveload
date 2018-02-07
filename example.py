@@ -59,6 +59,10 @@ a.el=[]
 a.et=()
 save_example(a,"save.data")
 b=load_example("save.data")
+
+def combine(dct,ins):
+	for key in ins:
+		dct[key]=ins[key]
 # check by yourself
 # like:
 """
@@ -71,3 +75,10 @@ save_example([1,2,3,"test"],"save.data")
 save_example({},"save.data")
 ...
 """
+# this test should seperate into two program:
+# no done so will as it did not save __dict__ in other modules in main.__dict__
+import sys
+main=sys.modules["__main__"]
+save_example(main.__dict__,"env.back")
+dct=load_example("env.back")
+combine(main.__dict__,dct)
