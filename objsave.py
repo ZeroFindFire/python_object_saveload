@@ -87,6 +87,7 @@ class SaveLoad:
 		self.regist('tuple',SaveLoad.save_list,SaveLoad.load_tuple)
 		self.regist('set',SaveLoad.save_list,SaveLoad.load_set)
 		self.regist('int',SaveLoad.save_int,SaveLoad.load_int)
+		self.regist('NoneType',SaveLoad.save_NoneType,SaveLoad.load_NoneType)
 		self.regist('float',SaveLoad.save_float,SaveLoad.load_float)
 		self.regist('bool',SaveLoad.save_bool,SaveLoad.load_bool)
 		self.regist('str',SaveLoad.save_str,SaveLoad.load_str)
@@ -312,6 +313,14 @@ class SaveLoad:
 	@staticmethod
 	def load_bool(rd,load):
 		return rd.getb()
+
+	@staticmethod
+	def save_NoneType(val,wt,save):
+		pass
+
+	@staticmethod
+	def load_NoneType(rd,load):
+		return None
 
 	@staticmethod
 	def save_str(val,wt,save):
