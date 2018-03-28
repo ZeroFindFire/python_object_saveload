@@ -85,6 +85,7 @@ class SaveLoad:
 		self.regist('dict',SaveLoad.save_dict,SaveLoad.load_dict)
 		self.regist('list',SaveLoad.save_list,SaveLoad.load_list)
 		self.regist('tuple',SaveLoad.save_list,SaveLoad.load_tuple)
+		self.regist('set',SaveLoad.save_list,SaveLoad.load_set)
 		self.regist('int',SaveLoad.save_int,SaveLoad.load_int)
 		self.regist('float',SaveLoad.save_float,SaveLoad.load_float)
 		self.regist('bool',SaveLoad.save_bool,SaveLoad.load_bool)
@@ -283,6 +284,10 @@ class SaveLoad:
 	@staticmethod
 	def load_tuple(rd,load):
 		return tuple(SaveLoad.load_list(rd,load))
+
+	@staticmethod
+	def load_set(rd,load):
+		return set(SaveLoad.load_list(rd,load))
 
 	@staticmethod
 	def save_int(val,wt,save):
