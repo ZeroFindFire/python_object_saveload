@@ -13,3 +13,7 @@
 
 # 在readme写的字显示很大，不想多写
 # 实现将python对象保存到文件和从文件读取的方法，基本类型和继承自object的对象，一般都可以save和load。主要的工作是，1）一个框架和基本数据类型（int，float，list，map。。。）save和load的实现，2）一个io接口和其在文件上的实现，3）在对象间有环的时候，避免无限循环的save
+
+
+# 可以用demo.py的函数方便的使用
+# can easily used by demo.py
