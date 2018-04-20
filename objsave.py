@@ -42,7 +42,15 @@ import rw
 
 class SaveLoadError(object):
 	pass 
-
+def combine_cst(dct,ins):
+	for key in ins:
+		if type(ins[key])!=SaveLoadError:
+			execstr= "dct."+str(key)+"=ins[key]"
+			#print "cmd:",execstr
+			try:
+				exec execstr 
+			except:
+				pass
 class SaveLoad:
 	Link="knil"
 	error="rorre"
@@ -82,6 +90,7 @@ class SaveLoad:
 		self.show = show  
 		self.init()
 		self.regist('type',SaveLoad.save_construct,SaveLoad.load_construct)
+		self.regist('function',SaveLoad.save_func,SaveLoad.load_func)
 		self.regist('dict',SaveLoad.save_dict,SaveLoad.load_dict)
 		self.regist('list',SaveLoad.save_list,SaveLoad.load_list)
 		self.regist('tuple',SaveLoad.save_list,SaveLoad.load_tuple)
@@ -193,9 +202,15 @@ class SaveLoad:
 		except:
 			wt.putstring(SaveLoad.error)
 			return  
+		try:
+			cst_dct=cst.__dict__
+		except:
+			cst_dct={}
 		wt.putstring(SaveLoad.check)
 		wt.putstring(md)
 		wt.putstring(name)
+		#print "save cstdct:",cst_dct
+		SaveLoad.save_dict(cst_dct,wt,save)
 		SaveLoad.save_dict(dct,wt,save)
 		return 
 
@@ -218,6 +233,15 @@ class SaveLoad:
 	@staticmethod
 	def load_obj_value(obj,rd,load):
 		if type(obj)!=SaveLoadError:
+			cst_dict=SaveLoad.load_dict(rd,load)
+			#print "load cstdct:",cst_dict
+			try:
+				#print "BFR load cstdct:",type(obj).__dict__
+				combine_cst(type(obj),cst_dict)
+				#print "AFT load cstdct:",type(obj).__dict__
+			except Exception,e:
+				print "ERROR:",e
+				pass
 			obj.__dict__=SaveLoad.load_dict(rd,load)
 
 	@staticmethod
@@ -233,6 +257,61 @@ class SaveLoad:
 		wt.putstring(SaveLoad.check)
 		wt.putstring(md)
 		wt.putstring(name)
+		#print "SAVE:"+md+"."+name
+		try:
+			cst_dct=cst.__dict__
+		except:
+			cst_dct={}
+		SaveLoad.save_dict(cst_dct,wt,save)
+		return  
+
+	@staticmethod
+	def load_func(rd,load):
+		chk=rd.getstring()
+		if chk==SaveLoad.error:
+			return SaveLoadError()
+		md=rd.getstring()
+		name=rd.getstring()
+		__import__(md)
+		import sys 
+		#print "LOAD:"+md+"."+name
+		md=sys.modules[md]
+		try:
+			cst=getattr(md,name)
+		except:
+			return SaveLoadError()
+		cst_dict=SaveLoad.load_dict(rd,load)
+		try:
+			combine_cst(cst,cst_dict)
+		except:
+			pass
+		return cst 
+	@staticmethod
+	def save_func(cst,wt,save):
+		try:
+			md=cst.__module__
+			name=cst.__name__
+			__import__(md)
+			import sys 
+			tmd=sys.modules[md]
+			try:
+				getattr(tmd,name)
+			except:
+				raise Exception()
+			if SaveLoad.isobject(cst)==False:
+				raise Exception()
+		except Exception,e:
+			wt.putstring(SaveLoad.error)
+			return 
+		wt.putstring(SaveLoad.check)
+		wt.putstring(md)
+		wt.putstring(name)
+		#print "SAVE:"+md+"."+name
+		try:
+			cst_dct=cst.__dict__
+		except:
+			cst_dct={}
+		SaveLoad.save_dict(cst_dct,wt,save)
 		return  
 
 	@staticmethod
@@ -244,8 +323,14 @@ class SaveLoad:
 		name=rd.getstring()
 		__import__(md)
 		import sys 
+		#print "LOAD:"+md+"."+name
 		md=sys.modules[md]
 		cst=getattr(md,name)
+		cst_dict=SaveLoad.load_dict(rd,load)
+		try:
+			combine_cst(cst,cst_dict)
+		except:
+			pass
 		return cst 
 	
 	@staticmethod
