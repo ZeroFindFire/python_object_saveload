@@ -1,15 +1,13 @@
-# python_object_saveload
+"ç›®å‰æ²¡æ³•ä¿å­˜lambdaå‡½æ•°ï¼Œæ‰€ä»¥å¤§æ¦‚è¦è’åºŸäº†"
+"# python_object_saveload"
 
-# for Python2.7
+"# for Python2.7"
 
-# main codes are in objsave.py
-# example are in example.py
+"# main codes are in objsave.py"
+"# example are in example.py"
 
-# ¾ßÌåÊµÏÖÔÚobjsave.py
-# Êµ¼ÊÊ¹ÓÃ²Î¿¼emample.py
+"# å…·ä½“å®ç°åœ¨objsave.py"
+"# å®é™…ä½¿ç”¨å‚è€ƒemample.py"
 
-# character font in readme is too large, don't want to write too much
-# the program is to save python object to file and load python object from file. generally, base type and Objects inherit from type object can directly use the program to save and load. the main work of the project is: 1, a framework and implement of save&load of base type(int, float, list, map...) 2, an io interface and implementation in file. 3, avoid unlimit save when objects has ring
-
-# ÔÚreadmeĞ´µÄ×ÖÏÔÊ¾ºÜ´ó£¬²»Ïë¶àĞ´
-# ÊµÏÖ½«python¶ÔÏó±£´æµ½ÎÄ¼şºÍ´ÓÎÄ¼ş¶ÁÈ¡µÄ·½·¨£¬»ù±¾ÀàĞÍºÍ¼Ì³Ğ×ÔobjectµÄ¶ÔÏó£¬Ò»°ã¶¼¿ÉÒÔsaveºÍload¡£Ö÷ÒªµÄ¹¤×÷ÊÇ£¬1£©Ò»¸ö¿ò¼ÜºÍ»ù±¾Êı¾İÀàĞÍ£¨int£¬float£¬list£¬map¡£¡£¡££©saveºÍloadµÄÊµÏÖ£¬2£©Ò»¸öio½Ó¿ÚºÍÆäÔÚÎÄ¼şÉÏµÄÊµÏÖ£¬3£©ÔÚ¶ÔÏó¼äÓĞ»·µÄÊ±ºò£¬±ÜÃâÎŞÏŞÑ­»·µÄsave
+"# character font in readme is too large, don't want to write too much"
+"# the program is to save python object to file and load python object from file. generally, base type and Objects inherit from type object can directly use the program to save "
