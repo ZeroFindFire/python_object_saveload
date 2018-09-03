@@ -24,6 +24,7 @@ def load_example(filepath):
 	return obj 
 
 class Link(object):
+	cnt=0
 	def __init__(self,key,desc):
 		self.key=key 
 		self.desc=desc 
@@ -46,7 +47,10 @@ def load_no(rd,load):
 	name=rd.getstring()
 	return NoObject(i,name)
 sl.regist(NoObject.__module__+"."+NoObject.__name__,save_no,load_no)
-
+Link.cnt=123
+def test():
+	pass
+test.test=123
 a=Link(666,"demo")
 a.nxt=Link("z","x")
 a.nxt.nxt=a 
@@ -57,7 +61,10 @@ a.map={a:a,"a":a,"list":a.list,"tuple":a.tuple,123:123}
 a.empty={}
 a.el=[]
 a.et=()
+a.fc=test
 save_example(a,"save.data")
+Link.cnt=321
+test.test=321
 b=load_example("save.data")
 
 def combine(dct,ins):
@@ -77,8 +84,9 @@ save_example({},"save.data")
 """
 # this test should seperate into two program:
 # no done so will as it did not save __dict__ in other modules in main.__dict__
-import sys
-main=sys.modules["__main__"]
-save_example(main.__dict__,"env.back")
-dct=load_example("env.back")
-combine(main.__dict__,dct)
+
+# import sys
+# main=sys.modules["__main__"]
+# save_example(main.__dict__,"env.back")
+# dct=load_example("env.back")
+# combine(main.__dict__,dct)

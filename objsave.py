@@ -42,7 +42,15 @@ import rw
 
 class SaveLoadError(object):
 	pass 
-
+def combine_cst(dct,ins):
+	for key in ins:
+		if type(ins[key])!=SaveLoadError:
+			execstr= "dct."+str(key)+"=ins[key]"
+			#print "cmd:",execstr
+			try:
+				exec execstr 
+			except:
+				pass
 class SaveLoad:
 	Link="knil"
 	error="rorre"
@@ -82,6 +90,8 @@ class SaveLoad:
 		self.show = show  
 		self.init()
 		self.regist('type',SaveLoad.save_construct,SaveLoad.load_construct)
+		self.regist('function',SaveLoad.save_func,SaveLoad.load_func)
+		self.regist('instancemethod',SaveLoad.save_func,SaveLoad.load_func)
 		self.regist('dict',SaveLoad.save_dict,SaveLoad.load_dict)
 		self.regist('list',SaveLoad.save_list,SaveLoad.load_list)
 		self.regist('tuple',SaveLoad.save_list,SaveLoad.load_tuple)
@@ -94,6 +104,20 @@ class SaveLoad:
 		self.regist('bytearray',SaveLoad.save_btarr,SaveLoad.load_btarr)
 		self.regist('module',SaveLoad.save_module,SaveLoad.load_module)
 		self.regist('numpy.ndarray',save_np,load_np)
+
+		self.regist('numpy.int8',save_np,load_np)
+		self.regist('numpy.int16',save_np,load_np)
+		self.regist('numpy.int32',save_np,load_np)
+		self.regist('numpy.int64',save_np,load_np)
+
+		self.regist('numpy.uint8',save_np,load_np)
+		self.regist('numpy.uint16',save_np,load_np)
+		self.regist('numpy.uint32',save_np,load_np)
+		self.regist('numpy.uint64',save_np,load_np)
+
+		self.regist('numpy.float16',save_np,load_np)
+		self.regist('numpy.float32',save_np,load_np)
+		self.regist('numpy.float64',save_np,load_np)
 
 	def save(self,val,wt):
 		if self.show:
@@ -193,9 +217,15 @@ class SaveLoad:
 		except:
 			wt.putstring(SaveLoad.error)
 			return  
+		try:
+			cst_dct=cst.__dict__
+		except:
+			cst_dct={}
 		wt.putstring(SaveLoad.check)
 		wt.putstring(md)
 		wt.putstring(name)
+		#print "save cstdct:",cst_dct
+		SaveLoad.save_dict(cst_dct,wt,save)
 		SaveLoad.save_dict(dct,wt,save)
 		return 
 
@@ -218,6 +248,15 @@ class SaveLoad:
 	@staticmethod
 	def load_obj_value(obj,rd,load):
 		if type(obj)!=SaveLoadError:
+			cst_dict=SaveLoad.load_dict(rd,load)
+			#print "load cstdct:",cst_dict
+			try:
+				#print "BFR load cstdct:",type(obj).__dict__
+				combine_cst(type(obj),cst_dict)
+				#print "AFT load cstdct:",type(obj).__dict__
+			except Exception,e:
+				print "ERROR:",e
+				pass
 			obj.__dict__=SaveLoad.load_dict(rd,load)
 
 	@staticmethod
@@ -233,6 +272,90 @@ class SaveLoad:
 		wt.putstring(SaveLoad.check)
 		wt.putstring(md)
 		wt.putstring(name)
+		#print "SAVE:"+md+"."+name
+		try:
+			cst_dct=cst.__dict__
+		except:
+			cst_dct={}
+		SaveLoad.save_dict(cst_dct,wt,save)
+		return  
+
+	@staticmethod
+	def load_func(rd,load):
+		chk=rd.getstring()
+		if chk==SaveLoad.error:
+			return SaveLoadError()
+		md=rd.getstring()
+		class_name = load(rd)
+		#class_name=rd.getstring()
+		f_object = load(rd)
+		name=rd.getstring()
+		if f_object is not None:
+			cst = getattr(f_object,name)
+		else:
+			__import__(md)
+			import sys 
+			md=sys.modules[md]
+			try:
+				dct = md.__dict__ 
+				if class_name == ' ':
+					cst=getattr(md,name)
+				else:
+					cst = getattr(dct[class_name],name)
+			except:
+				return SaveLoadError()
+		cst_dict=SaveLoad.load_dict(rd,load)
+		try:
+			combine_cst(cst,cst_dict)
+		except:
+			pass
+		return cst 
+	@staticmethod
+	def save_func(cst,wt,save):
+		try:
+			md=cst.__module__
+			name=cst.__name__
+			__import__(md)
+			import sys 
+			tmd=sys.modules[md]
+			dct = tmd.__dict__ 
+			class_name = None
+			try:
+				#print "function:",cst
+				f_object = cst.im_self
+				#print "f_object:",f_object
+			except Exception,e:
+				#print "Inner Exception:",e.message
+				f_object = None
+				if name in dct and getattr(tmd,name) == cst:
+					class_name = ' '
+				else:
+					for k in dct:
+						cs = dct[k]
+						if type(cs) == type:
+							try:
+								cdct = cs.__dict__ 
+								if name in cdct and getattr(cs,name)==cst:
+									class_name = cs.__name__ 
+									break
+							except:
+								pass 
+			if SaveLoad.isobject(cst)==False or (class_name is None and f_object is None):
+				raise Exception(str(cst)+" is not object")
+		except Exception,e:
+			#print "Exception:",e.message
+			wt.putstring(SaveLoad.error)
+			return 
+		wt.putstring(SaveLoad.check)
+		wt.putstring(md)
+		save(class_name, wt)
+		save(f_object, wt)
+		wt.putstring(name)
+		try:
+			cst_dct=cst.__dict__
+		except:
+			cst_dct={}
+		SaveLoad.save_dict(cst_dct,wt,save)
 		return  
 
 	@staticmethod
@@ -244,8 +367,14 @@ class SaveLoad:
 		name=rd.getstring()
 		__import__(md)
 		import sys 
+		#print "LOAD:"+md+"."+name
 		md=sys.modules[md]
 		cst=getattr(md,name)
+		cst_dict=SaveLoad.load_dict(rd,load)
+		try:
+			combine_cst(cst,cst_dict)
+		except:
+			pass
 		return cst 
 	
 	@staticmethod

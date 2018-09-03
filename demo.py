@@ -4,21 +4,21 @@
 import objsave
 import frw 
 sl=objsave.SaveLoad()
-def save(obj,filepath):
+def save(obj,filepath,show = False):
 	global sl
 	wt=frw.FileDataWriter()
 	wt.open(filepath)
 	sl.init()
-	#sl.show=True
+	sl.show=show
 	sl.save(obj,wt)
 	wt.close()
 
-def load(filepath):
+def load(filepath,show = False):
 	global sl
 	rd=frw.FileDataReader()
 	rd.open(filepath)
 	sl.init()
-	#sl.show=True
+	sl.show=show
 	obj=sl.load(rd)
 	rd.close()
 	return obj 

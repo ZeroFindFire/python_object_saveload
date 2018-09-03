@@ -33,7 +33,7 @@ class FileDataReader(DataReader):
 		num,=struct.unpack('>i',self.fp.read(4))
 		return num;
 	def getb(self):
-		num,=struct.unpack('>b',self.fp.read(1))
+		num,=struct.unpack('>?',self.fp.read(1))
 		return num;
 class FileDataWriter(DataWriter):
 	def __init__(self,fp=None):
